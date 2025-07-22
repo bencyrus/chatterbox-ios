@@ -7,11 +7,15 @@
 
 import SwiftUI
 
+/// Main app entry point
 @main
 struct cueApp: App {
+    @StateObject private var languageManager = LanguageManager()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(languageManager)
         }
     }
 }
