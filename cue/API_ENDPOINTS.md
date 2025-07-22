@@ -70,9 +70,13 @@ _Update user's language preference_
 
 ### **4. GET /user/progress**
 
-_Fetch all user completion progress_
+_Fetch user completion progress for a specific language_
 
-**URL:** `GET /api/v1/user/progress`
+**URL:** `GET /api/v1/user/progress?language=en`
+
+**Query Parameters:**
+
+- `language` (required): `en` or `fr`
 
 **Response:**
 
@@ -91,17 +95,23 @@ _Fetch all user completion progress_
 ]
 ```
 
+**Note:** Progress is tracked separately per language. Completing prompt #1 in English doesn't affect prompt #1 in French.
+
 ---
 
 ### **5. PUT /user/progress/{promptId}**
 
-_Update completion status for a specific prompt_
+_Update completion status for a specific prompt in a specific language_
 
-**URL:** `PUT /api/v1/user/progress/1`
+**URL:** `PUT /api/v1/user/progress/1?language=en`
 
 **Path Parameters:**
 
 - `promptId`: The ID of the prompt to update
+
+**Query Parameters:**
+
+- `language` (required): `en` or `fr`
 
 **Request Body:**
 
@@ -154,16 +164,20 @@ CREATE TABLE user_progress (
     id SERIAL PRIMARY KEY,
     user_id VARCHAR(255) REFERENCES users(user_id),
     prompt_id INTEGER REFERENCES prompts(id),
+    language VARCHAR(2) NOT NULL,
     is_completed BOOLEAN DEFAULT false,
     completed_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE(user_id, prompt_id)
+    UNIQUE(user_id, prompt_id, language)
 );
 
 CREATE INDEX idx_user_progress_user_id ON user_progress(user_id);
-CREATE INDEX idx_user_progress_prompt_id ON user_progress(prompt_id);
+CREATE INDEX idx_user_progress_language ON user_progress(language);
+CREATE INDEX idx_user_progress_user_lang ON user_progress(user_id, language);
 ```
+
+**Important:** The `user_progress` table includes a `language` column and unique constraint on `(user_id, prompt_id, language)` to track completion separately for each language.
 
 ---
 
@@ -172,8 +186,8 @@ CREATE INDEX idx_user_progress_prompt_id ON user_progress(prompt_id);
 - [ ] **GET /user** - Return user data and language preference
 - [ ] **GET /prompts?language=en** - Return prompts filtered by language
 - [ ] **PUT /user/language** - Update user's preferred language
-- [ ] **GET /user/progress** - Return all completion status for user
-- [ ] **PUT /user/progress/{promptId}** - Update prompt completion status
+- [ ] **GET /user/progress?language=en** - Return completion status for specific language
+- [ ] **PUT /user/progress/{promptId}?language=en** - Update prompt completion for specific language
 
 ---
 
@@ -189,4 +203,4 @@ CREATE INDEX idx_user_progress_prompt_id ON user_progress(prompt_id);
 
 3. The app handles all error cases gracefully and falls back to local storage
 
-**Your iOS app is ready to consume these 5 endpoints immediately!**
+**Your iOS app now tracks completion separately for English and French prompts! 🇺🇸🇫🇷**
