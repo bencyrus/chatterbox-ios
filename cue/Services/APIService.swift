@@ -12,8 +12,8 @@ protocol APIService {
     func fetchUserData() async -> UserData
     func fetchPrompts(language: String) async -> [Prompt]
     func updateLanguagePreference(language: String) async
-    func fetchUserProgress() async -> [UserProgress]
-    func updatePromptStatus(promptId: Int, isCompleted: Bool) async
+    func fetchUserProgress(language: String) async -> [UserProgress]
+    func updatePromptStatus(promptId: Int, language: String, isCompleted: Bool) async
 }
 
 /// User data from backend

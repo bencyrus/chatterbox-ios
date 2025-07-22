@@ -50,27 +50,32 @@ class LanguageManager: ObservableObject {
         }
     }
     
-    /// Check if a prompt is completed
+    /// Check if a prompt is completed in the current language
     func isPromptCompleted(_ promptId: Int) -> Bool {
-        return progressManager.isPromptCompleted(promptId)
+        return progressManager.isPromptCompleted(promptId, language: currentLanguage.rawValue)
     }
     
-    /// Toggle completion status for a prompt
+    /// Toggle completion status for a prompt in the current language
     @MainActor
     func togglePromptCompletion(_ promptId: Int) {
-        let currentStatus = progressManager.isPromptCompleted(promptId)
+        let currentStatus = progressManager.isPromptCompleted(promptId, language: currentLanguage.rawValue)
         let newStatus = !currentStatus
         
         // Update local storage immediately for responsiveness
-        progressManager.setPromptCompleted(promptId, isCompleted: newStatus)
+        progressManager.setPromptCompleted(promptId, language: currentLanguage.rawValue, isCompleted: newStatus)
         
         // Update backend in background
         Task {
-            await apiService.updatePromptStatus(promptId: promptId, isCompleted: newStatus)
+            await apiService.updatePromptStatus(promptId: promptId, language: currentLanguage.rawValue, isCompleted: newStatus)
         }
         
         // Trigger UI update
         objectWillChange.send()
+    }
+    
+    /// Get completion count for current language
+    func getCompletionCount() -> Int {
+        return progressManager.getCompletionCount(for: currentLanguage.rawValue)
     }
     
     /// Load user data and prompts from backend
@@ -86,9 +91,9 @@ class LanguageManager: ObservableObject {
         let prompts = await apiService.fetchPrompts(language: currentLanguage.rawValue)
         self.prompts = prompts
         
-        // 3. Sync progress from backend
-        let backendProgress = await apiService.fetchUserProgress()
-        progressManager.syncWithBackendProgress(backendProgress)
+        // 3. Sync progress from backend for this language
+        let backendProgress = await apiService.fetchUserProgress(language: currentLanguage.rawValue)
+        progressManager.syncWithBackendProgress(backendProgress, language: currentLanguage.rawValue)
     }
     
     /// Update language preference
@@ -106,6 +111,15 @@ class LanguageManager: ObservableObject {
             let prompts = await apiService.fetchPrompts(language: language.rawValue)
             await MainActor.run {
                 self.prompts = prompts
+            }
+            
+            // Sync progress for the new language
+            let backendProgress = await apiService.fetchUserProgress(language: language.rawValue)
+            await MainActor.run {
+                progressManager.syncWithBackendProgress(backendProgress, language: language.rawValue)
+                
+                // Trigger UI update to reflect completion status for new language
+                objectWillChange.send()
             }
         }
     }

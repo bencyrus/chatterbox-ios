@@ -36,19 +36,27 @@ class MockAPIService: APIService {
         print("📡 Updated language preference to: \(language)")
     }
     
-    func fetchUserProgress() async -> [UserProgress] {
+    func fetchUserProgress(language: String) async -> [UserProgress] {
         try? await Task.sleep(nanoseconds: 300_000_000)
         
-        // Mock some completed prompts
-        return [
-            UserProgress(promptId: 1, isCompleted: true, completedAt: Date()),
-            UserProgress(promptId: 3, isCompleted: true, completedAt: Date().addingTimeInterval(-86400)),
-            UserProgress(promptId: 5, isCompleted: false, completedAt: nil)
-        ]
+        // Mock different completed prompts for different languages
+        if language == "en" {
+            return [
+                UserProgress(promptId: 1, isCompleted: true, completedAt: Date()),
+                UserProgress(promptId: 3, isCompleted: true, completedAt: Date().addingTimeInterval(-86400))
+            ]
+        } else if language == "fr" {
+            return [
+                UserProgress(promptId: 2, isCompleted: true, completedAt: Date()),
+                UserProgress(promptId: 4, isCompleted: true, completedAt: Date().addingTimeInterval(-172800))
+            ]
+        } else {
+            return []
+        }
     }
     
-    func updatePromptStatus(promptId: Int, isCompleted: Bool) async {
+    func updatePromptStatus(promptId: Int, language: String, isCompleted: Bool) async {
         try? await Task.sleep(nanoseconds: 200_000_000)
-        print("📡 Updated prompt \(promptId) completion status to: \(isCompleted)")
+        print("📡 Updated prompt \(promptId) in \(language) completion status to: \(isCompleted)")
     }
 } 

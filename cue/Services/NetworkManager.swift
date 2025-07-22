@@ -48,8 +48,8 @@ class NetworkManager: APIService {
         _ = try? await URLSession.shared.data(for: request)
     }
     
-    func fetchUserProgress() async -> [UserProgress] {
-        guard let url = URL(string: "\(baseURL)/user/progress"),
+    func fetchUserProgress(language: String) async -> [UserProgress] {
+        guard let url = URL(string: "\(baseURL)/user/progress?language=\(language)"),
               let data = try? await URLSession.shared.data(from: url).0,
               let progress = try? JSONDecoder().decode([UserProgress].self, from: data) else {
             return []
@@ -57,8 +57,8 @@ class NetworkManager: APIService {
         return progress
     }
     
-    func updatePromptStatus(promptId: Int, isCompleted: Bool) async {
-        guard let url = URL(string: "\(baseURL)/user/progress/\(promptId)") else { return }
+    func updatePromptStatus(promptId: Int, language: String, isCompleted: Bool) async {
+        guard let url = URL(string: "\(baseURL)/user/progress/\(promptId)?language=\(language)") else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
