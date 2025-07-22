@@ -14,6 +14,7 @@ class LanguageManager: ObservableObject {
     @Published var prompts: [Prompt] = []
     
     private let apiService: APIService
+    private let progressManager = LocalProgressManager()
     
     enum Language: String, CaseIterable {
         case english = "en"
@@ -49,18 +50,45 @@ class LanguageManager: ObservableObject {
         }
     }
     
+    /// Check if a prompt is completed
+    func isPromptCompleted(_ promptId: Int) -> Bool {
+        return progressManager.isPromptCompleted(promptId)
+    }
+    
+    /// Toggle completion status for a prompt
+    @MainActor
+    func togglePromptCompletion(_ promptId: Int) {
+        let currentStatus = progressManager.isPromptCompleted(promptId)
+        let newStatus = !currentStatus
+        
+        // Update local storage immediately for responsiveness
+        progressManager.setPromptCompleted(promptId, isCompleted: newStatus)
+        
+        // Update backend in background
+        Task {
+            await apiService.updatePromptStatus(promptId: promptId, isCompleted: newStatus)
+        }
+        
+        // Trigger UI update
+        objectWillChange.send()
+    }
+    
     /// Load user data and prompts from backend
     @MainActor
     private func loadInitialData() async {
-        // 1. Get user's language preference from backend (backend always wins)
+        // 1. Get user's language preference from backend
         let userData = await apiService.fetchUserData()
         if let backendLanguage = Language(rawValue: userData.preferredLanguage) {
             self.currentLanguage = backendLanguage
         }
         
-        // 2. Load prompts for the backend-determined language
+        // 2. Load prompts for the language
         let prompts = await apiService.fetchPrompts(language: currentLanguage.rawValue)
         self.prompts = prompts
+        
+        // 3. Sync progress from backend
+        let backendProgress = await apiService.fetchUserProgress()
+        progressManager.syncWithBackendProgress(backendProgress)
     }
     
     /// Update language preference

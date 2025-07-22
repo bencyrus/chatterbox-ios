@@ -15,4 +15,11 @@ struct Prompt: Codable, Identifiable, Hashable {
     let followup_2: String
     let followup_3: String
     let followup_4: String
+}
+
+/// User progress for a specific prompt
+struct UserProgress: Codable {
+    let promptId: Int
+    let isCompleted: Bool
+    let completedAt: Date?
 } 
