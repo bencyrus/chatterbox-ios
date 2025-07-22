@@ -14,7 +14,18 @@ class LocalProgressManager: ObservableObject {
     
     /// Get completion status for all prompts from local storage
     func getLocalProgress() -> [Int: Bool] {
-        return userDefaults.object(forKey: progressKey) as? [Int: Bool] ?? [:]
+        guard let stringKeyDict = userDefaults.object(forKey: progressKey) as? [String: Bool] else {
+            return [:]
+        }
+        
+        // Convert string keys back to integers
+        var intKeyDict: [Int: Bool] = [:]
+        for (stringKey, value) in stringKeyDict {
+            if let intKey = Int(stringKey) {
+                intKeyDict[intKey] = value
+            }
+        }
+        return intKeyDict
     }
     
     /// Check if a specific prompt is completed locally
@@ -27,7 +38,14 @@ class LocalProgressManager: ObservableObject {
     func setPromptCompleted(_ promptId: Int, isCompleted: Bool) {
         var progress = getLocalProgress()
         progress[promptId] = isCompleted
-        userDefaults.set(progress, forKey: progressKey)
+        
+        // Convert integer keys to strings for UserDefaults
+        var stringKeyDict: [String: Bool] = [:]
+        for (intKey, value) in progress {
+            stringKeyDict[String(intKey)] = value
+        }
+        
+        userDefaults.set(stringKeyDict, forKey: progressKey)
     }
     
     /// Sync backend progress with local storage (backend wins)
@@ -39,7 +57,13 @@ class LocalProgressManager: ObservableObject {
             localProgress[progress.promptId] = progress.isCompleted
         }
         
-        userDefaults.set(localProgress, forKey: progressKey)
+        // Convert integer keys to strings for UserDefaults
+        var stringKeyDict: [String: Bool] = [:]
+        for (intKey, value) in localProgress {
+            stringKeyDict[String(intKey)] = value
+        }
+        
+        userDefaults.set(stringKeyDict, forKey: progressKey)
     }
     
     /// Get all completed prompt IDs
