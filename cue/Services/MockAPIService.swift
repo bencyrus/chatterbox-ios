@@ -39,20 +39,8 @@ class MockAPIService: APIService {
     func fetchUserProgress(language: String) async -> [UserProgress] {
         try? await Task.sleep(nanoseconds: 300_000_000)
         
-        // Mock different completed prompts for different languages
-        if language == "en" {
-            return [
-                UserProgress(promptId: 1, isCompleted: true, completedAt: Date()),
-                UserProgress(promptId: 3, isCompleted: true, completedAt: Date().addingTimeInterval(-86400))
-            ]
-        } else if language == "fr" {
-            return [
-                UserProgress(promptId: 2, isCompleted: true, completedAt: Date()),
-                UserProgress(promptId: 4, isCompleted: true, completedAt: Date().addingTimeInterval(-172800))
-            ]
-        } else {
-            return []
-        }
+        // Return empty array - all prompts start as incomplete
+        return []
     }
     
     func updatePromptStatus(promptId: Int, language: String, isCompleted: Bool) async {
