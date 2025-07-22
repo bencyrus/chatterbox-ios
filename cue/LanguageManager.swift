@@ -8,10 +8,12 @@
 import Foundation
 import SwiftUI
 
-/// Manages app language state and localization
+/// Manages app language state and data from API
 class LanguageManager: ObservableObject {
     @Published var currentLanguage: Language = .english
     @Published var prompts: [Prompt] = []
+    
+    private let apiService: APIService
     
     enum Language: String, CaseIterable {
         case english = "en"
@@ -32,8 +34,11 @@ class LanguageManager: ObservableObject {
         }
     }
     
-    init() {
-        loadPrompts()
+    init(apiService: APIService = MockAPIService()) {
+        self.apiService = apiService
+        Task {
+            await loadInitialData()
+        }
     }
     
     /// Returns localized text based on current language setting
@@ -44,24 +49,36 @@ class LanguageManager: ObservableObject {
         }
     }
     
-    /// Loads prompts from JSON file for current language
-    private func loadPrompts() {
-        let fileName = currentLanguage.rawValue
-        guard let url = Bundle.main.url(forResource: fileName, withExtension: "json"),
-              let data = try? Data(contentsOf: url),
-              let decodedPrompts = try? JSONDecoder().decode([Prompt].self, from: data) else {
-            print("Failed to load prompts for language: \(currentLanguage.rawValue)")
-            return
+    /// Load user data and prompts from backend
+    @MainActor
+    private func loadInitialData() async {
+        // 1. Get user's language preference from backend (backend always wins)
+        let userData = await apiService.fetchUserData()
+        if let backendLanguage = Language(rawValue: userData.preferredLanguage) {
+            self.currentLanguage = backendLanguage
         }
         
-        DispatchQueue.main.async {
-            self.prompts = decodedPrompts
-        }
+        // 2. Load prompts for the backend-determined language
+        let prompts = await apiService.fetchPrompts(language: currentLanguage.rawValue)
+        self.prompts = prompts
     }
     
-    /// Updates the current language and reloads prompts
+    /// Update language preference
+    @MainActor
     func setLanguage(_ language: Language) {
+        guard language != currentLanguage else { return }
+        
         currentLanguage = language
-        loadPrompts()
+        
+        Task {
+            // Update backend preference
+            await apiService.updateLanguagePreference(language: language.rawValue)
+            
+            // Load new prompts
+            let prompts = await apiService.fetchPrompts(language: language.rawValue)
+            await MainActor.run {
+                self.prompts = prompts
+            }
+        }
     }
 } 
