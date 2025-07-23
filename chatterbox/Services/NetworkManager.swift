@@ -73,27 +73,6 @@ class NetworkManager: APIService {
                 return prompts
             } else {
                 print("❌ Failed to decode prompts response")
-                
-                // Try to decode as backend format for debugging
-                if let backendPrompts = try? JSONDecoder().decode([BackendPrompt].self, from: data) {
-                    print("📊 Backend format detected: \(backendPrompts.count) prompts")
-                    // Convert backend format to iOS format
-                    return backendPrompts.compactMap { backendPrompt in
-                        guard backendPrompt.followups.count >= 4 else {
-                            print("⚠️ Prompt \(backendPrompt.id) has only \(backendPrompt.followups.count) followups")
-                            return nil
-                        }
-                        return Prompt(
-                            id: backendPrompt.id,
-                            main_prompt: backendPrompt.main_prompt,
-                            followup_1: backendPrompt.followups[0],
-                            followup_2: backendPrompt.followups[1],
-                            followup_3: backendPrompt.followups[2],
-                            followup_4: backendPrompt.followups[3]
-                        )
-                    }
-                }
-                
                 return []
             }
         } catch {

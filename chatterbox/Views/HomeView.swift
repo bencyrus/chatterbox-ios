@@ -134,10 +134,9 @@ struct PromptDetailView: View {
                         .foregroundColor(.primary)
                     
                     VStack(alignment: .leading, spacing: 12) {
-                        FollowUpQuestionView(question: prompt.followup_1)
-                        FollowUpQuestionView(question: prompt.followup_2)
-                        FollowUpQuestionView(question: prompt.followup_3)
-                        FollowUpQuestionView(question: prompt.followup_4)
+                        ForEach(prompt.followups.indices, id: \.self) { index in
+                            FollowUpQuestionView(question: prompt.followups[index])
+                        }
                     }
                 }
                 .padding()

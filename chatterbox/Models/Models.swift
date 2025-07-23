@@ -7,18 +7,8 @@
 
 import Foundation
 
-/// Data model representing a conversation prompt with follow-up questions (iOS format)
+/// Data model representing a conversation prompt with follow-up questions
 struct Prompt: Codable, Identifiable, Hashable {
-    let id: Int
-    let main_prompt: String
-    let followup_1: String
-    let followup_2: String
-    let followup_3: String
-    let followup_4: String
-}
-
-/// Backend prompt format (for conversion)
-struct BackendPrompt: Codable {
     let id: Int
     let main_prompt: String
     let followups: [String]
