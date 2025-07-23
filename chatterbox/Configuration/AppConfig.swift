@@ -1,6 +1,6 @@
 //
 //  AppConfig.swift
-//  cue
+//  chatterbox
 //
 //  Created by Ben Cyrus on 2025-07-22.
 //
@@ -29,13 +29,13 @@ struct AppConfig {
     
     /// Bundle identifier
     static var bundleIdentifier: String {
-        return Bundle.main.bundleIdentifier ?? "com.cue.app"
+        return Bundle.main.bundleIdentifier ?? "com.chatterbox.app"
     }
     
     // MARK: - Security Settings
     
     /// Keychain service identifier
-    static let keychainService = "com.cue.app.auth"
+    static let keychainService = "com.chatterbox.app.auth"
     
     // MARK: - API Timeouts
     
@@ -57,7 +57,7 @@ extension AppConfig {
             fatalError("Invalid API URL configuration: \(apiURL)")
         }
         
-        print("🔧 Cue App - Version \(appVersion) (\(buildNumber))")
+        print("🔧 Chatterbox App - Version \(appVersion) (\(buildNumber))")
         print("🌐 API: \(apiURL)")
     }
 } 

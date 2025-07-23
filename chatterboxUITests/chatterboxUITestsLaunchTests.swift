@@ -1,13 +1,13 @@
 //
-//  cueUITestsLaunchTests.swift
-//  cueUITests
+//  chatterboxUITestsLaunchTests.swift
+//  chatterboxUITests
 //
 //  Created by Ben Cyrus on 2025-07-22.
 //
 
 import XCTest
 
-final class cueUITestsLaunchTests: XCTestCase {
+final class chatterboxUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

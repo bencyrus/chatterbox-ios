@@ -1,6 +1,6 @@
 //
-//  cueApp.swift
-//  cue
+//  chatterboxApp.swift
+//  chatterbox
 //
 //  Created by Ben Cyrus on 2025-07-22.
 //
@@ -9,7 +9,7 @@ import SwiftUI
 
 /// Main app entry point
 @main
-struct cueApp: App {
+struct chatterboxApp: App {
     @StateObject private var authManager = AuthManager(
         authService: AuthService(baseURL: AppConfig.apiURL)
     )

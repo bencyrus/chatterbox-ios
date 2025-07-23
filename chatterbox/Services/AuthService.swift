@@ -1,6 +1,6 @@
 //
 //  AuthService.swift
-//  cue
+//  chatterbox
 //
 //  Created by Ben Cyrus on 2025-07-22.
 //
@@ -14,7 +14,7 @@ class AuthService: ObservableObject {
     // MARK: - Properties
     
     private let baseURL: String
-    private let keychainService = "com.cue.app"
+    private let keychainService = "com.chatterbox.app"
     private let tokenKey = "auth_token"
     private let accountKey = "user_account"
     

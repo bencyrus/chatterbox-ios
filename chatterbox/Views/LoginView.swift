@@ -1,6 +1,6 @@
 //
 //  LoginView.swift
-//  cue
+//  chatterbox
 //
 //  Created by Ben Cyrus on 2025-07-22.
 //
@@ -22,8 +22,8 @@ struct LoginView: View {
                         .foregroundColor(.blue)
                     
                     Text(languageManager.localizedText(
-                        english: "Welcome to Cue",
-                        french: "Bienvenue dans Cue"
+                        english: "Welcome to Chatterbox",
+                        french: "Bienvenue dans Chatterbox"
                     ))
                     .font(.largeTitle)
                     .fontWeight(.bold)

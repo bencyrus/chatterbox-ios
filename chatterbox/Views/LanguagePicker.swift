@@ -1,6 +1,6 @@
 //
 //  LanguagePicker.swift
-//  cue
+//  chatterbox
 //
 //  Created by Ben Cyrus on 2025-07-22.
 //
