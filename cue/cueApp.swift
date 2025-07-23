@@ -10,38 +10,39 @@ import SwiftUI
 /// Main app entry point
 @main
 struct cueApp: App {
+    @StateObject private var authManager = AuthManager(
+        authService: AuthService(baseURL: AppConfig.apiURL)
+    )
     @StateObject private var languageManager = LanguageManager(
-        apiService: AppConfiguration.current.apiService
+        apiService: NetworkManager(baseURL: AppConfig.apiURL)
     )
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(languageManager)
+            Group {
+                if authManager.isAuthenticated {
+                    ContentView()
+                        .environmentObject(languageManager)
+                        .environmentObject(authManager)
+                } else {
+                    LoginView()
+                        .environmentObject(languageManager)
+                        .environmentObject(authManager)
+                }
+            }
+            .onAppear {
+                AppConfig.validateConfiguration()
+                setupAPIServiceAuth()
+            }
+            .onChange(of: authManager.isAuthenticated) { _, isAuthenticated in
+                setupAPIServiceAuth()
+            }
         }
     }
-}
-
-/// App configuration for API service selection
-struct AppConfiguration {
-    let apiService: APIService
     
-    static let current = AppConfiguration()
-    
-    private init() {
-        // 🔧 SWITCH BETWEEN MOCK AND PRODUCTION API HERE
-        #if DEBUG
-        // Use mock API in debug builds
-        self.apiService = MockAPIService()
-        #else
-        // Use real API in release builds
-        self.apiService = NetworkManager(baseURL: "https://your-api-domain.com/api/v1")
-        #endif
-        
-        // 🚧 FOR TESTING: Force mock API even in release
-        // self.apiService = MockAPIService()
-        
-        // 🚀 FOR PRODUCTION: Force real API with your domain
-        // self.apiService = NetworkManager(baseURL: "https://your-api-domain.com/api/v1")
+    /// Setup API service authentication when auth state changes
+    private func setupAPIServiceAuth() {
+        let authHeader = authManager.getAuthorizationHeader()
+        languageManager.setAuthorizationHeader(authHeader)
     }
 }

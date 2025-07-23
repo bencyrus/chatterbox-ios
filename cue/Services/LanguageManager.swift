@@ -35,7 +35,7 @@ class LanguageManager: ObservableObject {
         }
     }
     
-    init(apiService: APIService = MockAPIService()) {
+    init(apiService: APIService) {
         self.apiService = apiService
         Task {
             await loadInitialData()
@@ -78,22 +78,37 @@ class LanguageManager: ObservableObject {
         return progressManager.getCompletionCount(for: currentLanguage.rawValue)
     }
     
+    /// Set authorization header for API requests
+    func setAuthorizationHeader(_ header: String?) {
+        apiService.setAuthorizationHeader(header)
+    }
+    
     /// Load user data and prompts from backend
     @MainActor
     private func loadInitialData() async {
+        print("🚀 Loading initial data...")
+        
         // 1. Get user's language preference from backend
+        print("📱 Fetching user data...")
         let userData = await apiService.fetchUserData()
         if let backendLanguage = Language(rawValue: userData.preferredLanguage) {
             self.currentLanguage = backendLanguage
+            print("🌍 Set language to: \(backendLanguage.displayName)")
+        } else {
+            print("⚠️ Using default language: \(currentLanguage.displayName)")
         }
         
         // 2. Load prompts for the language
+        print("📚 Fetching prompts for language: \(currentLanguage.rawValue)...")
         let prompts = await apiService.fetchPrompts(language: currentLanguage.rawValue)
         self.prompts = prompts
+        print("✅ Loaded \(prompts.count) prompts")
         
         // 3. Sync progress from backend for this language
+        print("📊 Syncing progress...")
         let backendProgress = await apiService.fetchUserProgress(language: currentLanguage.rawValue)
         progressManager.syncWithBackendProgress(backendProgress, language: currentLanguage.rawValue)
+        print("✅ Initial data loading complete")
     }
     
     /// Update language preference
@@ -102,24 +117,30 @@ class LanguageManager: ObservableObject {
         guard language != currentLanguage else { return }
         
         currentLanguage = language
+        print("🔄 Language changed to: \(language.displayName)")
         
         Task {
             // Update backend preference
+            print("💾 Updating backend language preference...")
             await apiService.updateLanguagePreference(language: language.rawValue)
             
             // Load new prompts
+            print("📚 Fetching prompts for new language: \(language.rawValue)...")
             let prompts = await apiService.fetchPrompts(language: language.rawValue)
             await MainActor.run {
                 self.prompts = prompts
+                print("✅ Updated to \(prompts.count) prompts for \(language.displayName)")
             }
             
             // Sync progress for the new language
+            print("📊 Syncing progress for new language...")
             let backendProgress = await apiService.fetchUserProgress(language: language.rawValue)
             await MainActor.run {
                 progressManager.syncWithBackendProgress(backendProgress, language: language.rawValue)
                 
                 // Trigger UI update to reflect completion status for new language
                 objectWillChange.send()
+                print("✅ Language change complete")
             }
         }
     }

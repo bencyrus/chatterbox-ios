@@ -51,6 +51,6 @@ struct LanguagePicker: View {
 
 #Preview {
     LanguagePicker()
-        .environmentObject(LanguageManager())
+        .environmentObject(LanguageManager(apiService: NetworkManager(baseURL: "https://example.com/api/v1")))
         .padding()
 } 

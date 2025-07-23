@@ -41,5 +41,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
-        .environmentObject(LanguageManager())
+        .environmentObject(LanguageManager(apiService: NetworkManager(baseURL: "https://example.com/api/v1")))
 }

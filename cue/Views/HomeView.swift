@@ -42,7 +42,7 @@ struct HomeView: View {
                 }
             }
         }
-        .onChange(of: selectedTab) { newValue in
+        .onChange(of: selectedTab) { _, newValue in
             if newValue == 0 {
                 navigationPath = NavigationPath()
             }
@@ -209,6 +209,6 @@ struct FollowUpQuestionView: View {
 #Preview {
     NavigationStack {
         HomeView(selectedTab: .constant(0))
-            .environmentObject(LanguageManager())
+            .environmentObject(LanguageManager(apiService: NetworkManager(baseURL: "https://example.com/api/v1")))
     }
 } 
